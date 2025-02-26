@@ -47,7 +47,7 @@ public class GamePlay : MonoBehaviour
     void Start()
     {
         InitBoard();
-        StartCoroutine(ShowTween(0.2f));
+        StartCoroutine(ShowTween());
     }
 
     private IEnumerator ShowTween(float seconds = 0f)
@@ -140,7 +140,6 @@ public class GamePlay : MonoBehaviour
                     UpdateInfoByWiner(playerId);
                     StartCoroutine(ClearBoard(1.5f, () => StatusInfoTips("人机先手！", () => {
                         StartCoroutine(PlayerTwoOnClick());
-                        grid.GetComponent<CanvasGroup>().interactable = true;
                     })));
                 }
                 else
@@ -149,7 +148,6 @@ public class GamePlay : MonoBehaviour
                     // 上一把获胜玩家Id=1的情况下继续人机先手
                     if (preWinerPlayerId == playerId_1) StartCoroutine(ClearBoard(1.5f, () => StatusInfoTips("人机先手！", () => {
                         StartCoroutine(PlayerTwoOnClick());
-                        grid.GetComponent<CanvasGroup>().interactable = true;
                     })));
                     else StartCoroutine(ClearBoard(1.5f, () =>
                     {
@@ -184,7 +182,6 @@ public class GamePlay : MonoBehaviour
                     // 上一把获胜玩家Id=1的情况下继续人机先手
                     if (preWinerPlayerId == playerId_1) StartCoroutine(ClearBoard(1.5f, () => StatusInfoTips("人机先手！", () => {
                         StartCoroutine(PlayerTwoOnClick());
-                        grid.GetComponent<CanvasGroup>().interactable = true;
                     })));
                     else StartCoroutine(ClearBoard(1.5f, () =>
                     {
@@ -202,6 +199,7 @@ public class GamePlay : MonoBehaviour
         if (seconds != 0f) yield return new WaitForSeconds(seconds);
 
         CellOnClick(playerId_2);
+        grid.GetComponent<CanvasGroup>().interactable = true;
     }
 
 
