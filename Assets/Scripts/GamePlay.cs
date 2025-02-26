@@ -59,6 +59,7 @@ public class GamePlay : MonoBehaviour
     // ÷ÿ÷√∆Â≈Ã  
     private IEnumerator ClearBoard(float seconds = 0f, Action callback = null)
     {
+        restartButton.interactable = false;
         if (seconds != 0f) yield return new WaitForSeconds(seconds);
         
         int i = 0;
@@ -77,6 +78,7 @@ public class GamePlay : MonoBehaviour
         isGameOver = false;
         preWinerPlayerId = -1;
         if (coroutine != null) StopCoroutine(coroutine);
+        restartButton.interactable = true;
         callback?.Invoke();
     }
 
@@ -164,7 +166,6 @@ public class GamePlay : MonoBehaviour
         {
             Vector2Int vector2 = miniMaxAI.ChooseAction(ExplorationProbability);
             MakeMove(playerId, boardIdMap[vector2.x * row + vector2.y]);
-            grid.GetComponent<CanvasGroup>().interactable = true;
             if (IsGameOver())
             {
                 if (IsWin(playerId)) 
