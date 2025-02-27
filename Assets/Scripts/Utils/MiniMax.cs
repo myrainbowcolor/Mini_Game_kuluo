@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class MiniMaxAI
 {
-    private int playerId_1; // 玩家1 (通常是 X)  
-    private int playerId_2; // 玩家2 (通常是 O)  
-    private readonly int col = 0;
+    private int playerId_1;
+    private int playerId_2;
+    private readonly int col;
     private int[,] boardState;
 
     public MiniMaxAI(int[,] boardState, int playerId_1, int playerId_2)
@@ -16,10 +16,9 @@ public class MiniMaxAI
         col = boardState.GetLength(0);
     }
 
-    // 选择动作（落子）  
     public Vector2Int ChooseAction(float explorationProbability)
     {
-        if (Random.value < explorationProbability) // 以一定概率探索  
+        if (Random.value < explorationProbability)
         {
             return ExploreRandomMove();
         }
@@ -29,7 +28,6 @@ public class MiniMaxAI
         }
     }
 
-    // 随机选择一个可落子的地方  
     private Vector2Int ExploreRandomMove()
     {
         List<Vector2Int> availableMoves = GetAvailableMoves();
@@ -37,7 +35,6 @@ public class MiniMaxAI
         return availableMoves[randomIndex];
     }
 
-    // 查找最佳移动  
     private Vector2Int FindBestMove()
     {
         int bestScore = -int.MaxValue;
@@ -47,11 +44,11 @@ public class MiniMaxAI
         {
             for (int j = 0; j < col; j++)
             {
-                if (boardState[i, j] == 0) // 检查是否为空  
+                if (boardState[i, j] == 0)
                 {
-                    boardState[i, j] = playerId_2; // AI落子  
-                    int score = Minimax(false);
-                    boardState[i, j] = 0; // 撤销落子  
+                    boardState[i, j] = playerId_2;
+                    int score = Minimax(false, -int.MaxValue, int.MaxValue);
+                    boardState[i, j] = 0;
 
                     if (score > bestScore)
                     {
@@ -64,44 +61,59 @@ public class MiniMaxAI
         return bestMove;
     }
 
-    // Minimax 算法实现  
-    private int Minimax(bool isMaximizing)
+    private int Minimax(bool isMaximizing, int alpha, int beta)
     {
-        if (IsWin(playerId_2)) return 1; // AI 赢  
-        if (IsWin(playerId_1)) return -1; // 玩家赢  
-        if (IsDraw()) return 0; // 平局  
+        if (IsWin(playerId_2)) return 1;
+        if (IsWin(playerId_1)) return -1;
+        if (IsDraw()) return 0;
 
-        if (isMaximizing) // 当前是 AI 的回合  
+        if (isMaximizing)
         {
             int bestScore = -int.MaxValue;
+
             for (int i = 0; i < col; i++)
             {
                 for (int j = 0; j < col; j++)
                 {
-                    if (boardState[i, j] == 0) // 检查是否为空  
+                    if (boardState[i, j] == 0)
                     {
-                        boardState[i, j] = playerId_2; // AI 落子  
-                        int score = Minimax(false);
-                        boardState[i, j] = 0; // 撤销落子  
+                        boardState[i, j] = playerId_2;
+                        int score = Minimax(false, alpha, beta);
+                        boardState[i, j] = 0;
+
                         bestScore = Mathf.Max(score, bestScore);
+                        alpha = Mathf.Max(alpha, score);
+
+                        if (beta <= alpha)
+                        {
+                            break; // Beta pruning  
+                        }
                     }
                 }
             }
             return bestScore;
         }
-        else // 当前是玩家的回合  
+        else
         {
             int bestScore = int.MaxValue;
+
             for (int i = 0; i < col; i++)
             {
                 for (int j = 0; j < col; j++)
                 {
-                    if (boardState[i, j] == 0) // 检查是否为空  
+                    if (boardState[i, j] == 0)
                     {
-                        boardState[i, j] = playerId_1; // 玩家落子  
-                        int score = Minimax(true);
-                        boardState[i, j] = 0; // 撤销落子  
+                        boardState[i, j] = playerId_1;
+                        int score = Minimax(true, alpha, beta);
+                        boardState[i, j] = 0;
+
                         bestScore = Mathf.Min(score, bestScore);
+                        beta = Mathf.Min(beta, score);
+
+                        if (beta <= alpha)
+                        {
+                            break; // Alpha pruning  
+                        }
                     }
                 }
             }
@@ -109,22 +121,18 @@ public class MiniMaxAI
         }
     }
 
-    // 检查玩家胜利  
     private bool IsWin(int player)
     {
-        // 行检查  
         for (int i = 0; i < col; i++)
         {
             if (boardState[i, 0] == player && boardState[i, 1] == player && boardState[i, 2] == player)
                 return true;
         }
-        // 列检查  
         for (int j = 0; j < col; j++)
         {
             if (boardState[0, j] == player && boardState[1, j] == player && boardState[2, j] == player)
                 return true;
         }
-        // 对角线检查  
         if ((boardState[0, 0] == player && boardState[1, 1] == player && boardState[2, 2] == player) ||
             (boardState[0, 2] == player && boardState[1, 1] == player && boardState[2, 0] == player))
             return true;
@@ -132,18 +140,16 @@ public class MiniMaxAI
         return false;
     }
 
-    // 检查平局  
     private bool IsDraw()
     {
         foreach (int cell in boardState)
         {
             if (cell == 0)
-                return false; // 只要有空位就不是平局  
+                return false;
         }
         return true;
     }
 
-    // 获取可落子的地方  
     List<Vector2Int> GetAvailableMoves()
     {
         List<Vector2Int> availableMoves = new List<Vector2Int>();
@@ -151,7 +157,7 @@ public class MiniMaxAI
         {
             for (int j = 0; j < col; j++)
             {
-                if (boardState[i, j] == 0) // 位置可用  
+                if (boardState[i, j] == 0)
                 {
                     availableMoves.Add(new Vector2Int(i, j));
                 }
